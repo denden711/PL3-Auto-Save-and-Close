@@ -14,33 +14,42 @@ logging.basicConfig(filename='pl3_processing.log', level=logging.INFO, format='%
 try:
     with open("coords.json", "r") as f:
         coords = json.load(f)
+    save_button_coords = coords["save_button_coords"]
+    confirm_button_coords = coords["confirm_button_coords"]
+    close_button_coords = coords["close_button_coords"]
 except FileNotFoundError:
-    messagebox.showerror("エラー", "coords.json ファイルが見つかりません。先に座標取得スクリプトを実行してください。")
-    logging.error("coords.json ファイルが見つかりません。")
+    error_message = "coords.json ファイルが見つかりません。先に座標取得スクリプトを実行してください。"
+    messagebox.showerror("エラー", error_message)
+    logging.error(error_message)
     exit()
 except json.JSONDecodeError as e:
-    messagebox.showerror("エラー", f"coords.json の読み込み中にエラーが発生しました: {e}")
-    logging.error(f"coords.json の読み込み中にエラーが発生しました: {e}")
+    error_message = f"coords.json の読み込み中にエラーが発生しました: {e}"
+    messagebox.showerror("エラー", error_message)
+    logging.error(error_message)
     exit()
-
-save_button_coords = coords["save_button_coords"]
-confirm_button_coords = coords["confirm_button_coords"]
-close_button_coords = coords["close_button_coords"]
+except Exception as e:
+    error_message = f"coords.json の読み込み中に予期しないエラーが発生しました: {e}"
+    messagebox.showerror("エラー", error_message)
+    logging.error(error_message)
+    exit()
 
 # GUIでディレクトリを選択するための関数
 def select_directory():
-    root = Tk()
-    root.withdraw()  # メインウィンドウを表示しない
-    directory_path = filedialog.askdirectory()
-    return directory_path
+    try:
+        root = Tk()
+        root.withdraw()  # メインウィンドウを表示しない
+        directory_path = filedialog.askdirectory()
+        if not directory_path:
+            raise ValueError("ディレクトリが選択されていません。")
+        return directory_path
+    except Exception as e:
+        error_message = f"ディレクトリ選択中にエラーが発生しました: {e}"
+        messagebox.showerror("エラー", error_message)
+        logging.error(error_message)
+        exit()
 
 # ディレクトリを選択
 directory_path = select_directory()
-if not directory_path:
-    messagebox.showerror("エラー", "ディレクトリが選択されていません。プログラムを終了します。")
-    logging.error("ディレクトリが選択されていません。")
-    exit()
-
 logging.info(f"選択されたディレクトリ: {directory_path}")
 print(f"選択されたディレクトリ: {directory_path}")
 
@@ -63,8 +72,9 @@ for root, dirs, files in os.walk(directory_path):
                 logging.info(f"{file_path} ファイルを開きました。")
                 print("ファイルを開きました。")
             except Exception as e:
-                logging.error(f"{file_path} のオープン中にエラーが発生しました: {e}")
-                print(f"{file_path} のオープン中にエラーが発生しました: {e}")
+                error_message = f"{file_path} のオープン中にエラーが発生しました: {e}"
+                logging.error(error_message)
+                print(error_message)
                 continue
 
             # ファイルが開くまで待つ（必要に応じて時間を調整）
@@ -73,11 +83,14 @@ for root, dirs, files in os.walk(directory_path):
             # ウィンドウの情報を取得
             try:
                 window = gw.getActiveWindow()
+                if window is None:
+                    raise Exception("アクティブウィンドウが見つかりませんでした。")
                 logging.info("ウィンドウを取得しました。")
                 print("ウィンドウを取得しました。")
             except Exception as e:
-                logging.error(f"ウィンドウの操作中にエラーが発生しました: {e}")
-                print(f"ウィンドウの操作中にエラーが発生しました: {e}")
+                error_message = f"ウィンドウの操作中にエラーが発生しました: {e}"
+                logging.error(error_message)
+                print(error_message)
                 continue
 
             # ウィンドウの位置を取得
@@ -86,8 +99,9 @@ for root, dirs, files in os.walk(directory_path):
                 logging.info(f"ウィンドウ位置: ({win_x}, {win_y})")
                 print(f"ウィンドウ位置: ({win_x}, {win_y})")
             except Exception as e:
-                logging.error(f"ウィンドウ情報の取得中にエラーが発生しました: {e}")
-                print(f"ウィンドウ情報の取得中にエラーが発生しました: {e}")
+                error_message = f"ウィンドウ情報の取得中にエラーが発生しました: {e}"
+                logging.error(error_message)
+                print(error_message)
                 continue
 
             # 上書き保存ボタンをクリック
@@ -97,8 +111,9 @@ for root, dirs, files in os.walk(directory_path):
                 print("上書き保存ボタンをクリックしました。")
                 time.sleep(2)  # 確認ボタンが表示されるまでの待ち時間
             except Exception as e:
-                logging.error(f"上書き保存ボタンのクリック中にエラーが発生しました: {e}")
-                print(f"上書き保存ボタンのクリック中にエラーが発生しました: {e}")
+                error_message = f"上書き保存ボタンのクリック中にエラーが発生しました: {e}"
+                logging.error(error_message)
+                print(error_message)
                 continue
 
             # 上書き保存の確認ボタンをクリック
@@ -108,8 +123,9 @@ for root, dirs, files in os.walk(directory_path):
                 print("上書き保存の確認ボタンをクリックしました。")
                 time.sleep(2)  # 保存が完了するまでの待ち時間
             except Exception as e:
-                logging.error(f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}")
-                print(f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}")
+                error_message = f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}"
+                logging.error(error_message)
+                print(error_message)
                 continue
 
             # 保存が成功したか確認し、成功していない場合は再試行
@@ -126,23 +142,25 @@ for root, dirs, files in os.walk(directory_path):
                     # 上書き保存ボタンをクリック
                     try:
                         pyautogui.click(win_x + save_button_coords[0], win_y + save_button_coords[1])
-                        logging.info("上書き保存ボタンをクリックしました。")
-                        print("上書き保存ボタンをクリックしました。")
+                        logging.info("上書き保存ボタンを再度クリックしました。")
+                        print("上書き保存ボタンを再度クリックしました。")
                         time.sleep(2)  # 確認ボタンが表示されるまでの待ち時間
                     except Exception as e:
-                        logging.error(f"上書き保存ボタンのクリック中にエラーが発生しました: {e}")
-                        print(f"上書き保存ボタンのクリック中にエラーが発生しました: {e}")
+                        error_message = f"上書き保存ボタンのクリック中にエラーが発生しました: {e}"
+                        logging.error(error_message)
+                        print(error_message)
                         continue
 
                     # 上書き保存の確認ボタンをクリック
                     try:
                         pyautogui.click(win_x + confirm_button_coords[0], win_y + confirm_button_coords[1])
-                        logging.info("上書き保存の確認ボタンをクリックしました。")
-                        print("上書き保存の確認ボタンをクリックしました。")
+                        logging.info("上書き保存の確認ボタンを再度クリックしました。")
+                        print("上書き保存の確認ボタンを再度クリックしました。")
                         time.sleep(2)  # 保存が完了するまでの待ち時間
                     except Exception as e:
-                        logging.error(f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}")
-                        print(f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}")
+                        error_message = f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}"
+                        logging.error(error_message)
+                        print(error_message)
                         continue
 
                     attempt += 1
@@ -159,8 +177,9 @@ for root, dirs, files in os.walk(directory_path):
                 print("閉じるボタンをクリックしました。")
                 time.sleep(2)  # ファイルが閉じるまでの待ち時間
             except Exception as e:
-                logging.error(f"閉じるボタンのクリック中にエラーが発生しました: {e}")
-                print(f"閉じるボタンのクリック中にエラーが発生しました: {e}")
+                error_message = f"閉じるボタンのクリック中にエラーが発生しました: {e}"
+                logging.error(error_message)
+                print(error_message)
                 continue
 
 print("すべてのファイルを処理しました。")
