@@ -8,7 +8,7 @@ import json
 import logging
 
 # ログ設定
-logging.basicConfig(filename='pl3_processing.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='pl3_processing.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
 
 # 座標をファイルから読み込む
 try:
@@ -128,47 +128,14 @@ for root, dirs, files in os.walk(directory_path):
                 print(error_message)
                 continue
 
-            # 保存が成功したか確認し、成功していない場合は再試行
-            attempt = 1
-            max_attempts = 3
-            while attempt <= max_attempts:
-                if is_save_successful(file_path):
-                    logging.info(f"上書き保存が成功しました: {file_path}")
-                    print(f"上書き保存が成功しました: {file_path}")
-                    break
-                else:
-                    logging.warning(f"上書き保存が失敗しました。再試行します ({attempt}/{max_attempts}): {file_path}")
-                    print(f"上書き保存が失敗しました。再試行します ({attempt}/{max_attempts}): {file_path}")
-                    # 上書き保存ボタンをクリック
-                    try:
-                        pyautogui.click(win_x + save_button_coords[0], win_y + save_button_coords[1])
-                        logging.info("上書き保存ボタンを再度クリックしました。")
-                        print("上書き保存ボタンを再度クリックしました。")
-                        time.sleep(2)  # 確認ボタンが表示されるまでの待ち時間
-                    except Exception as e:
-                        error_message = f"上書き保存ボタンのクリック中にエラーが発生しました: {e}"
-                        logging.error(error_message)
-                        print(error_message)
-                        continue
-
-                    # 上書き保存の確認ボタンをクリック
-                    try:
-                        pyautogui.click(win_x + confirm_button_coords[0], win_y + confirm_button_coords[1])
-                        logging.info("上書き保存の確認ボタンを再度クリックしました。")
-                        print("上書き保存の確認ボタンを再度クリックしました。")
-                        time.sleep(2)  # 保存が完了するまでの待ち時間
-                    except Exception as e:
-                        error_message = f"上書き保存の確認ボタンのクリック中にエラーが発生しました: {e}"
-                        logging.error(error_message)
-                        print(error_message)
-                        continue
-
-                    attempt += 1
-
-            if attempt > max_attempts:
-                logging.error(f"上書き保存が失敗しました: {file_path}")
-                print(f"上書き保存が失敗しました: {file_path}")
-                continue
+            # 保存が成功したか確認
+            if is_save_successful(file_path):
+                logging.info(f"上書き保存が成功しました: {file_path}")
+                print(f"上書き保存が成功しました: {file_path}")
+            else:
+                error_message = f"上書き保存が失敗しました: {file_path}"
+                logging.error(error_message)
+                print(error_message)
 
             # 閉じるボタンをクリック
             try:
