@@ -2,8 +2,46 @@ import pyautogui
 import time
 import pygetwindow as gw
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox, Listbox, Scrollbar, Button
 import json
+
+def select_window():
+    def on_select(event):
+        try:
+            selected_index = listbox.curselection()[0]
+            selected_window = windows[selected_index]
+            root.quit()
+            root.destroy()
+            select_window.selected_window = selected_window
+        except IndexError:
+            messagebox.showerror("エラー", "ウィンドウが選択されていません。")
+            return
+
+    def on_quit():
+        messagebox.showinfo("選択なし", "ウィンドウが選択されていません。プログラムを終了します。")
+        root.quit()
+        root.destroy()
+        exit()
+
+    root = tk.Tk()
+    root.title("ウィンドウ選択")
+
+    listbox = Listbox(root, selectmode=tk.SINGLE)
+    listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    scrollbar = Scrollbar(root)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.BOTH)
+    listbox.config(yscrollcommand=scrollbar.set)
+    scrollbar.config(command=listbox.yview)
+
+    for window in windows:
+        listbox.insert(tk.END, window)
+
+    button = Button(root, text="選択", command=on_select)
+    button.pack(side=tk.BOTTOM, fill=tk.X)
+
+    root.protocol("WM_DELETE_WINDOW", on_quit)
+    root.mainloop()
 
 # 開いているすべてのウィンドウのタイトルを取得
 try:
@@ -13,22 +51,15 @@ except Exception as e:
     messagebox.showerror("エラー", f"ウィンドウの取得中にエラーが発生しました: {e}")
     exit()
 
-# GUIを作成してユーザーにウィンドウを選択させる
-root = tk.Tk()
-root.withdraw()  # メインウィンドウを表示しない
-
 if not windows:
     messagebox.showinfo("ウィンドウなし", "開いているウィンドウがありません。")
     exit()
 
-# ウィンドウのタイトルを選択
-selected_window = simpledialog.askstring("ウィンドウ選択", "操作対象のウィンドウタイトルを選択してください:", initialvalue=windows[0])
-
-if not selected_window:
-    messagebox.showinfo("選択なし", "ウィンドウが選択されていません。プログラムを終了します。")
-    exit()
+# ウィンドウを選択する
+select_window()
 
 # 選択されたウィンドウの情報を取得
+selected_window = select_window.selected_window
 try:
     window = gw.getWindowsWithTitle(selected_window)[0]
     window.activate()
