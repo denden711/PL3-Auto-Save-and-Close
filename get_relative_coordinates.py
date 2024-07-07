@@ -4,6 +4,10 @@ import pygetwindow as gw
 import tkinter as tk
 from tkinter import messagebox, Listbox, Scrollbar, Button
 import json
+import logging
+
+# ログ設定
+logging.basicConfig(filename='get_coordinates.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
 
 def select_window():
     def on_select(event=None):
@@ -15,10 +19,12 @@ def select_window():
             select_window.selected_window = selected_window
         except IndexError:
             messagebox.showerror("エラー", "ウィンドウが選択されていません。")
+            logging.error("ウィンドウが選択されていません。")
             return
 
     def on_quit():
         messagebox.showinfo("選択なし", "ウィンドウが選択されていません。プログラムを終了します。")
+        logging.info("ウィンドウが選択されていません。プログラムを終了します。")
         root.quit()
         root.destroy()
         exit()
@@ -50,10 +56,12 @@ try:
     windows = [title for title in windows if title]  # 空のタイトルを除外
 except Exception as e:
     messagebox.showerror("エラー", f"ウィンドウの取得中にエラーが発生しました: {e}")
+    logging.error(f"ウィンドウの取得中にエラーが発生しました: {e}")
     exit()
 
 if not windows:
     messagebox.showinfo("ウィンドウなし", "開いているウィンドウがありません。")
+    logging.info("開いているウィンドウがありません。")
     exit()
 
 # ウィンドウを選択する
@@ -66,9 +74,11 @@ try:
     window.activate()
 except IndexError:
     messagebox.showerror("エラー", "指定されたウィンドウが見つかりません。")
+    logging.error("指定されたウィンドウが見つかりません。")
     exit()
 except Exception as e:
     messagebox.showerror("エラー", f"ウィンドウの操作中にエラーが発生しました: {e}")
+    logging.error(f"ウィンドウの操作中にエラーが発生しました: {e}")
     exit()
 
 # 座標を取得する関数
@@ -84,6 +94,7 @@ def get_relative_coordinates(description):
         return (relative_x, relative_y)
     except Exception as e:
         messagebox.showerror("エラー", f"座標取得中にエラーが発生しました: {e}")
+        logging.error(f"座標取得中にエラーが発生しました: {e}")
         exit()
 
 # ウィンドウの位置とサイズを取得
@@ -91,6 +102,7 @@ try:
     win_x, win_y, win_width, win_height = window.left, window.top, window.width, window.height
 except Exception as e:
     messagebox.showerror("エラー", f"ウィンドウ情報の取得中にエラーが発生しました: {e}")
+    logging.error(f"ウィンドウ情報の取得中にエラーが発生しました: {e}")
     exit()
 
 # 各ボタンの座標を取得
@@ -100,6 +112,7 @@ try:
     close_button_coords = get_relative_coordinates("閉じるボタン")
 except Exception as e:
     messagebox.showerror("エラー", f"ボタン座標の取得中にエラーが発生しました: {e}")
+    logging.error(f"ボタン座標の取得中にエラーが発生しました: {e}")
     exit()
 
 # 座標をファイルに保存
@@ -113,6 +126,8 @@ try:
     with open("coords.json", "w") as f:
         json.dump(coords, f)
     print("座標を coords.json に保存しました。")
+    logging.info("座標を coords.json に保存しました。")
 except Exception as e:
     messagebox.showerror("エラー", f"座標の保存中にエラーが発生しました: {e}")
+    logging.error(f"座標の保存中にエラーが発生しました: {e}")
     exit()
