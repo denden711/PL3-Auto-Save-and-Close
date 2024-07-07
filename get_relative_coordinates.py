@@ -6,7 +6,7 @@ from tkinter import messagebox, Listbox, Scrollbar, Button
 import json
 
 def select_window():
-    def on_select(event):
+    def on_select(event=None):
         try:
             selected_index = listbox.curselection()[0]
             selected_window = windows[selected_index]
@@ -41,6 +41,7 @@ def select_window():
     button.pack(side=tk.BOTTOM, fill=tk.X)
 
     root.protocol("WM_DELETE_WINDOW", on_quit)
+    listbox.bind('<Double-1>', on_select)  # ダブルクリックでも選択を可能にする
     root.mainloop()
 
 # 開いているすべてのウィンドウのタイトルを取得
@@ -93,9 +94,13 @@ except Exception as e:
     exit()
 
 # 各ボタンの座標を取得
-save_button_coords = get_relative_coordinates("上書き保存ボタン")
-confirm_button_coords = get_relative_coordinates("上書き保存の確認ボタン")
-close_button_coords = get_relative_coordinates("閉じるボタン")
+try:
+    save_button_coords = get_relative_coordinates("上書き保存ボタン")
+    confirm_button_coords = get_relative_coordinates("上書き保存の確認ボタン")
+    close_button_coords = get_relative_coordinates("閉じるボタン")
+except Exception as e:
+    messagebox.showerror("エラー", f"ボタン座標の取得中にエラーが発生しました: {e}")
+    exit()
 
 # 座標をファイルに保存
 coords = {
