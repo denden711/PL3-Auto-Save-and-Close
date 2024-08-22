@@ -13,8 +13,8 @@ def log_message(log_file_path, message):
 def execute_pl3_and_save(file_path, log_file_path, wait_time=5, retry_limit=3):
     log_message(log_file_path, f"{datetime.now()} - パス: {file_path} - 起動開始")
     try:
-        # .pl3 ファイルを実行
-        process = subprocess.Popen(file_path, shell=True)
+        # .pl3 ファイルを実行（パスを引用符で囲む）
+        process = subprocess.Popen(f'"{file_path}"', shell=True)
         time.sleep(wait_time)  # ファイル実行後に待機
 
         # 上書き保存操作
